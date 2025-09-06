@@ -1,0 +1,144 @@
+const express = require('express');
+const axios = require('axios');
+
+const router = express.Router();
+
+// Test route
+router.get('/test', (req, res) => {
+  console.log('Test route called');
+  res.json({ success: true, message: 'Products route is working' });
+});
+
+// @route   GET /api/products
+// @desc    Get all products from fake store API
+// @access  Public
+router.get('/', async (req, res) => {
+  console.log('Products endpoint called');
+  try {
+    console.log('Fetching from:', `${process.env.FAKE_STORE_API}/products`);
+    const response = await axios.get(`${process.env.FAKE_STORE_API}/products`);
+    console.log('Fake Store API response status:', response.status);
+    const products = response.data;
+    console.log('Raw products count:', products.length);
+
+    // Transform the data to match our frontend interface
+    const transformedProducts = products.map(product => ({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      description: product.description,
+      image: product.image,
+      category: product.category
+    }));
+
+    console.log('Transformed products count:', transformedProducts.length);
+
+    res.json({
+      success: true,
+      count: transformedProducts.length,
+      data: transformedProducts
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching products'
+    });
+  }
+});
+
+// @route   GET /api/products/:id
+// @desc    Get single product by ID
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await axios.get(`${process.env.FAKE_STORE_API}/products/${id}`);
+    const product = response.data;
+
+    // Transform the data to match our frontend interface
+    const transformedProduct = {
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      description: product.description,
+      image: product.image,
+      category: product.category
+    };
+
+    res.json({
+      success: true,
+      data: transformedProduct
+    });
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+    
+    console.error('Error fetching product:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching product'
+    });
+  }
+});
+
+// @route   GET /api/products/category/:category
+// @desc    Get products by category
+// @access  Public
+router.get('/category/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    const response = await axios.get(`${process.env.FAKE_STORE_API}/products/category/${category}`);
+    const products = response.data;
+
+    // Transform the data to match our frontend interface
+    const transformedProducts = products.map(product => ({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      description: product.description,
+      image: product.image,
+      category: product.category
+    }));
+
+    res.json({
+      success: true,
+      count: transformedProducts.length,
+      data: transformedProducts
+    });
+  } catch (error) {
+    console.error('Error fetching products by category:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching products by category'
+    });
+  }
+});
+
+// @route   GET /api/products/categories
+// @desc    Get all categories
+// @access  Public
+router.get('/categories/all', async (req, res) => {
+  try {
+    const response = await axios.get(`${process.env.FAKE_STORE_API}/products/categories`);
+    const categories = response.data;
+
+    res.json({
+      success: true,
+      count: categories.length,
+      data: categories
+    });
+  } catch (error) {
+    console.error('Error fetching categories:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching categories'
+    });
+  }
+});
+
+module.exports = router;
