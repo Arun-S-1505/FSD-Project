@@ -34,7 +34,10 @@ app.use('/api/', limiter);
 // CORS middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://ecommerce-frontend-cyan-phi.vercel.app'] 
+    ? [
+        'https://ecommerce-frontend-cyan-phi.vercel.app',
+        process.env.FRONTEND_URL || 'https://ecommerce-frontend-cyan-phi.vercel.app'
+      ] 
     : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -87,27 +90,24 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// For local development only
-if (process.env.NODE_ENV !== 'production') {
-  const server = app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  });
+const server = app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
 
-  // Handle unhandled promise rejections
-  process.on('unhandledRejection', (err, promise) => {
-    console.log(`Error: ${err.message}`);
-    server.close(() => {
-      process.exit(1);
-    });
-  });
-
-  // Handle uncaught exceptions
-  process.on('uncaughtException', (err) => {
-    console.log(`Error: ${err.message}`);
-    console.log('Shutting down the server due to uncaught exception');
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => {
     process.exit(1);
   });
-}
+});
 
-// Export the app for Vercel
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.log(`Error: ${err.message}`);
+  console.log('Shutting down the server due to uncaught exception');
+  process.exit(1);
+});
+
+// Export the app for testing purposes
 module.exports = app;
