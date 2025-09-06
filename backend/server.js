@@ -34,11 +34,29 @@ app.use('/api/', limiter);
 // CORS middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [
-        'https://ecommerce-frontend-cyan-phi.vercel.app',
-        'https://ecommerce-frontend-2dw8xlizd-arun-saravanans-projects.vercel.app',
-        process.env.FRONTEND_URL || 'https://ecommerce-frontend-cyan-phi.vercel.app'
-      ] 
+    ? (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Allow specific domains and any Vercel preview URLs
+        const allowedOrigins = [
+          'https://ecommerce-frontend-cyan-phi.vercel.app',
+          'https://ecommerce-frontend-2dw8xlizd-arun-saravanans-projects.vercel.app',
+          'https://ecommerce-frontend-kq9l771nl-arun-saravanans-projects.vercel.app',
+          process.env.FRONTEND_URL
+        ];
+        
+        // Check if origin is in allowed list or matches Vercel pattern
+        const isAllowed = allowedOrigins.includes(origin) || 
+                         origin.includes('arun-saravanans-projects.vercel.app') ||
+                         origin.includes('ecommerce-frontend') && origin.includes('vercel.app');
+        
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
     : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
