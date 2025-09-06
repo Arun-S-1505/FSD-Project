@@ -3,11 +3,13 @@
 ## Deploy Backend to Render
 
 ### 1. Prepare Your Repository
+
 1. Create a new GitHub repository for your backend
 2. Copy the `backend/` folder contents to the root of the new repository
 3. Push to GitHub
 
 ### 2. Deploy on Render
+
 1. Go to [render.com](https://render.com) and sign up/login
 2. Click "New" → "Web Service"
 3. Connect your GitHub repository
@@ -19,6 +21,7 @@
    - **Plan**: Free tier
 
 ### 3. Set Environment Variables
+
 In Render dashboard, go to Environment section and add:
 
 ```
@@ -32,11 +35,14 @@ FRONTEND_URL=https://ecommerce-frontend-cyan-phi.vercel.app
 ```
 
 ### 4. Get Your Deployment URL
+
 After deployment, you'll get a URL like:
 `https://ecommerce-backend-xxxx.onrender.com`
 
 ### 5. Update Frontend Environment Variable
+
 Update your Vercel frontend environment variable:
+
 - `VITE_API_BASE_URL=https://your-render-app-url.onrender.com`
 
 ## Alternative: Deploy Backend Folder Directly
@@ -44,6 +50,7 @@ Update your Vercel frontend environment variable:
 If you want to deploy from the current monorepo:
 
 1. In Render, set:
+
    - **Root Directory**: `backend`
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
@@ -53,6 +60,7 @@ If you want to deploy from the current monorepo:
 ## Testing
 
 After deployment, test your backend:
+
 - Visit: `https://your-app.onrender.com/api/test`
 - Should return: `{"success": true, "message": "Backend API is working!"}`
 
