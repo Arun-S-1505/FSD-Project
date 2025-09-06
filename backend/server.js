@@ -35,28 +35,20 @@ app.use('/api/', limiter);
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
+        // For debugging - temporarily allow all Vercel domains
         console.log('CORS check for origin:', origin);
         
-        // Allow specific domains and any Vercel preview URLs
-        const allowedOrigins = [
-          'https://ecommerce-frontend-cyan-phi.vercel.app',
-          process.env.FRONTEND_URL
-        ];
+        if (!origin) {
+          console.log('No origin - allowing');
+          return callback(null, true);
+        }
         
-        // Check if origin is in allowed list or matches Vercel pattern
-        const isAllowed = allowedOrigins.includes(origin) || 
-                         (origin && origin.includes('vercel.app') && 
-                          (origin.includes('ecommerce-frontend') || origin.includes('arun-saravanans-projects')));
-        
-        console.log('Origin allowed:', isAllowed);
-        
-        if (isAllowed) {
+        // Allow all vercel.app domains temporarily for testing
+        if (origin.includes('vercel.app')) {
+          console.log('Vercel origin - allowing');
           callback(null, true);
         } else {
-          console.log('Origin blocked by CORS:', origin);
+          console.log('Non-Vercel origin - blocking');
           callback(new Error('Not allowed by CORS'));
         }
       }
