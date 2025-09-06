@@ -9,6 +9,35 @@ router.get('/test', (req, res) => {
   res.json({ success: true, message: 'Products route is working' });
 });
 
+// Mock products route for testing
+router.get('/mock', (req, res) => {
+  console.log('Mock products route called');
+  const mockProducts = [
+    {
+      id: 1,
+      name: "Test Product 1",
+      price: 29.99,
+      description: "This is a test product",
+      image: "https://via.placeholder.com/300",
+      category: "test"
+    },
+    {
+      id: 2,
+      name: "Test Product 2", 
+      price: 49.99,
+      description: "This is another test product",
+      image: "https://via.placeholder.com/300",
+      category: "test"
+    }
+  ];
+  
+  res.json({
+    success: true,
+    count: mockProducts.length,
+    data: mockProducts
+  });
+});
+
 // @route   GET /api/products
 // @desc    Get all products from fake store API
 // @access  Public
@@ -19,8 +48,14 @@ router.get('/', async (req, res) => {
     const apiUrl = process.env.FAKE_STORE_API || 'https://fakestoreapi.com';
     const fullUrl = `${apiUrl}/products`;
     console.log('Fetching from:', fullUrl);
+    console.log('Environment FAKE_STORE_API:', process.env.FAKE_STORE_API);
     
-    const response = await axios.get(fullUrl);
+    const response = await axios.get(fullUrl, {
+      timeout: 10000, // 10 second timeout
+      headers: {
+        'User-Agent': 'E-commerce-Backend/1.0'
+      }
+    });
     console.log('Fake Store API response status:', response.status);
     const products = response.data;
     console.log('Raw products count:', products.length);
@@ -44,9 +79,22 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching products:', error.message);
+    console.error('Full error:', error);
+    
+    // More detailed error response
+    let errorMessage = 'Error fetching products';
+    if (error.code === 'ENOTFOUND') {
+      errorMessage = 'Unable to connect to products API';
+    } else if (error.code === 'ECONNABORTED') {
+      errorMessage = 'Request timeout - products API took too long to respond';
+    } else if (error.response) {
+      errorMessage = `Products API error: ${error.response.status} ${error.response.statusText}`;
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Error fetching products'
+      message: errorMessage,
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
