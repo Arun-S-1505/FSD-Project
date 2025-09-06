@@ -15,30 +15,38 @@ const Products: React.FC = () => {
 
   const fetchProducts = async () => {
     console.log('Starting to fetch products...');
+    const apiUrl = createApiUrl('/api/products');
+    console.log('Full API URL:', apiUrl);
+    
     try {
-      console.log('Making request to /api/products');
-      const response = await fetch(createApiUrl('/api/products'));
+      console.log('Making request to:', apiUrl);
+      const response = await fetch(apiUrl);
       console.log('Response status:', response.status);
       console.log('Response ok:', response.ok);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (response.ok) {
         const result = await response.json();
-        console.log('Response data:', result);
+        console.log('Full response data:', result);
+        console.log('Result success:', result.success);
+        console.log('Result data:', result.data);
+        console.log('Data length:', result.data?.length);
         
-        if (result.success) {
-          console.log('Products fetched successfully:', result.data.length, 'products');
+        if (result.success && result.data) {
+          console.log('Setting products:', result.data.length, 'products');
           setProducts(result.data);
         } else {
-          console.error('Failed to fetch products:', result.message);
+          console.error('Invalid response structure:', result);
           setProducts([]);
         }
       } else {
-        console.error('HTTP error:', response.status);
+        const errorText = await response.text();
+        console.error('HTTP error:', response.status, errorText);
         setProducts([]);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
-      // Set empty array on error - backend should handle product fetching
+      console.error('Error details:', error instanceof Error ? error.message : String(error));
       setProducts([]);
     } finally {
       setLoading(false);

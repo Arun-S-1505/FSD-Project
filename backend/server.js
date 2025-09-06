@@ -36,6 +36,7 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
         'https://ecommerce-frontend-cyan-phi.vercel.app',
+        'https://ecommerce-frontend-2dw8xlizd-arun-saravanans-projects.vercel.app',
         process.env.FRONTEND_URL || 'https://ecommerce-frontend-cyan-phi.vercel.app'
       ] 
     : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
