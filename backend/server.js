@@ -38,22 +38,25 @@ app.use(cors({
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         
+        console.log('CORS check for origin:', origin);
+        
         // Allow specific domains and any Vercel preview URLs
         const allowedOrigins = [
           'https://ecommerce-frontend-cyan-phi.vercel.app',
-          'https://ecommerce-frontend-2dw8xlizd-arun-saravanans-projects.vercel.app',
-          'https://ecommerce-frontend-kq9l771nl-arun-saravanans-projects.vercel.app',
           process.env.FRONTEND_URL
         ];
         
         // Check if origin is in allowed list or matches Vercel pattern
         const isAllowed = allowedOrigins.includes(origin) || 
-                         origin.includes('arun-saravanans-projects.vercel.app') ||
-                         origin.includes('ecommerce-frontend') && origin.includes('vercel.app');
+                         (origin && origin.includes('vercel.app') && 
+                          (origin.includes('ecommerce-frontend') || origin.includes('arun-saravanans-projects')));
+        
+        console.log('Origin allowed:', isAllowed);
         
         if (isAllowed) {
           callback(null, true);
         } else {
+          console.log('Origin blocked by CORS:', origin);
           callback(new Error('Not allowed by CORS'));
         }
       }
