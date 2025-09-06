@@ -1,6 +1,12 @@
 # E-commerce Application - Monorepo Deployment Guide
 
-This project contains both a React frontend and a Node.js/Express backend in a single repository, deployed separately on Vercel.
+This project contains both a React frontend and a Node.js/Express backend in a single repository, deployed separately on Vercel and Render.
+
+## 🚀 Live Deployment
+
+**Frontend (Vercel):** https://ecommerce-frontend-ps6h8rbd2-arun-saravanans-projects.vercel.app/
+
+**Backend (Render):** https://ecommerce-backend-66nc.onrender.com/
 
 ## Project Structure
 
@@ -25,33 +31,36 @@ This project contains both a React frontend and a Node.js/Express backend in a s
    git push -u origin main
    ```
 
-### Step 2: Deploy Backend on Vercel
+### Step 2: Deploy Backend on Render
 
-1. **Go to Vercel.com** → New Project
+1. **Go to Render.com** → New Web Service
 2. **Import your repository**
 3. **Configure for Backend:**
+
    - Project Name: `ecommerce-backend`
-   - Framework: Other
+   - Environment: Node
    - **Root Directory: `backend`** ← This is key!
-   - Build Command: leave empty
-   - Output Directory: leave empty
-   - Install Command: `npm install`
+   - Build Command: `npm install`
+   - Start Command: `npm start`
 
 4. **Add Environment Variables:**
+
    ```
    NODE_ENV=production
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ecommerce
    JWT_SECRET=your-super-secret-jwt-key-here
-   PORT=3000
+   FAKE_STORE_API=https://fakestoreapi.com
+   FRONTEND_URL=https://your-frontend-vercel-url.vercel.app
    ```
 
-5. **Deploy** and note the URL (e.g., `https://ecommerce-backend-xxx.vercel.app`)
+5. **Deploy** and note the URL (e.g., `https://ecommerce-backend-66nc.onrender.com`)
 
 ### Step 3: Deploy Frontend on Vercel
 
 1. **Go to Vercel.com** → New Project
 2. **Import the SAME repository again**
 3. **Configure for Frontend:**
+
    - Project Name: `ecommerce-frontend`
    - Framework: Vite
    - **Root Directory: `./` (leave empty)** ← This deploys from root
@@ -60,9 +69,11 @@ This project contains both a React frontend and a Node.js/Express backend in a s
    - Install Command: `npm install`
 
 4. **Add Environment Variable:**
+
    ```
-   VITE_API_BASE_URL=https://your-backend-url.vercel.app
+   VITE_API_BASE_URL=https://your-render-backend-url.onrender.com
    ```
+
    (Use the URL from Step 2)
 
 5. **Deploy**
@@ -70,35 +81,42 @@ This project contains both a React frontend and a Node.js/Express backend in a s
 ## Advantages of This Approach
 
 ✅ **Single Repository**: Easier to manage code changes
-✅ **Separate Deployments**: Frontend and backend deploy independently
+✅ **Separate Deployments**: Frontend and backend deploy independently  
 ✅ **Independent Scaling**: Each service can scale separately
 ✅ **Environment Isolation**: Different environment variables for each
 ✅ **Easier Development**: All code in one place
+✅ **Backend on Render**: Better suited for Express.js applications
+✅ **Frontend on Vercel**: Optimized for React/Vite applications
 
 ## Environment Variables
 
 ### Frontend (.env)
+
 ```
-VITE_API_BASE_URL=https://your-backend-app.vercel.app
+VITE_API_BASE_URL=https://ecommerce-backend-66nc.onrender.com
 ```
 
-### Backend (Set in Vercel Dashboard)
+### Backend (Set in Render Dashboard)
+
 ```
 NODE_ENV=production
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ecommerce
 JWT_SECRET=your-super-secret-jwt-key
-PORT=3000
+FAKE_STORE_API=https://fakestoreapi.com
+FRONTEND_URL=https://ecommerce-frontend-ps6h8rbd2-arun-saravanans-projects.vercel.app
 ```
 
 ## Local Development
 
 **Frontend:**
+
 ```bash
 npm install
 npm run dev
 ```
 
 **Backend:**
+
 ```bash
 cd backend
 npm install
@@ -107,8 +125,8 @@ npm run dev
 
 ## Testing the Deployment
 
-1. **Test backend:** Visit `https://your-backend-url.vercel.app/api/products`
-2. **Test frontend:** Visit your frontend URL
+1. **Test backend:** Visit `https://ecommerce-backend-66nc.onrender.com/api/products`
+2. **Test frontend:** Visit `https://ecommerce-frontend-ps6h8rbd2-arun-saravanans-projects.vercel.app/`
 3. **Test integration:** Ensure frontend can communicate with backend
 
-Your monorepo is now ready for dual deployment on Vercel! 🚀
+Your monorepo is now ready for dual deployment on Vercel and Render! 🚀
