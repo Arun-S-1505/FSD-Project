@@ -15,8 +15,12 @@ router.get('/test', (req, res) => {
 router.get('/', async (req, res) => {
   console.log('Products endpoint called');
   try {
-    console.log('Fetching from:', `${process.env.FAKE_STORE_API}/products`);
-    const response = await axios.get(`${process.env.FAKE_STORE_API}/products`);
+    // Use environment variable or fallback to default URL
+    const apiUrl = process.env.FAKE_STORE_API || 'https://fakestoreapi.com';
+    const fullUrl = `${apiUrl}/products`;
+    console.log('Fetching from:', fullUrl);
+    
+    const response = await axios.get(fullUrl);
     console.log('Fake Store API response status:', response.status);
     const products = response.data;
     console.log('Raw products count:', products.length);
