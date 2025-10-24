@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const connectDB = require('./config/database');
+const { connectDB } = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
 
 // Import routes
@@ -14,6 +14,24 @@ const orderRoutes = require('./routes/orders');
 
 // Connect to database
 connectDB();
+
+// Sync database (create tables)
+const { sequelize } = require('./config/database');
+sequelize.sync({ force: false }) // Set to true only for development to drop and recreate tables
+  .then(() => {
+    console.log('Database synchronized successfully');
+  })
+  .catch((error) => {
+    console.error('Error synchronizing database:', error);
+  });
+
+// Define associations
+const User = require('./models/User');
+const Order = require('./models/Order');
+
+// Define associations after models are loaded
+Order.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Order, { foreignKey: 'userId', as: 'orders' });
 
 const app = express();
 

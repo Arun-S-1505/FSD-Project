@@ -1,72 +1,67 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const orderSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+const Order = sequelize.define('Order', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
-  items: [{
-    id: {
-      type: Number,
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
-    image: {
-      type: String,
-      required: true
-    },
-    category: {
-      type: String
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'id'
     }
-  }],
+  },
+  items: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    validate: {
+      notEmpty(value) {
+        if (!Array.isArray(value) || value.length === 0) {
+          throw new Error('Order items are required');
+        }
+      }
+    }
+  },
   total: {
-    type: Number,
-    required: true,
-    min: 0
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Total must be greater than 0'
+      }
+    }
   },
   status: {
-    type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-    default: 'pending'
+    type: DataTypes.ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled'),
+    defaultValue: 'pending'
   },
   shippingAddress: {
-    name: {
-      type: String,
-      required: true
-    },
-    email: {
-      type: String,
-      required: true
-    },
-    address: {
-      type: String,
-      required: true
+    type: DataTypes.JSON,
+    allowNull: false,
+    validate: {
+      notEmpty(value) {
+        if (!value || !value.name || !value.email || !value.address) {
+          throw new Error('Complete shipping address is required');
+        }
+      }
     }
   },
   paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid', 'failed'],
-    default: 'pending'
+    type: DataTypes.ENUM('pending', 'paid', 'failed'),
+    defaultValue: 'pending'
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+// Define associations
+Order.associate = (models) => {
+  Order.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+};
+
+module.exports = Order;

@@ -35,7 +35,7 @@ router.post('/', auth, async (req, res) => {
 
     // Create order
     const order = await Order.create({
-      userId: req.user._id,
+      userId: req.user.id,
       items,
       total,
       shippingAddress,
@@ -43,20 +43,30 @@ router.post('/', auth, async (req, res) => {
       paymentStatus: 'pending'
     });
 
-    // Populate user details
-    await order.populate('userId', 'name email');
+    // Fetch order with user details
+    const orderWithUser = await Order.findByPk(order.id, {
+      include: [{
+        model: require('../models/User'),
+        as: 'user',
+        attributes: ['name', 'email']
+      }]
+    });
 
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
       data: {
-        id: order._id,
-        userId: order.userId._id,
-        items: order.items,
-        total: order.total,
-        status: order.status,
-        createdAt: order.createdAt,
-        shippingAddress: order.shippingAddress
+        id: orderWithUser.id,
+        userId: orderWithUser.userId,
+        items: orderWithUser.items.map(item => ({
+          ...item,
+          price: parseFloat(item.price),
+          quantity: parseInt(item.quantity)
+        })),
+        total: parseFloat(orderWithUser.total),
+        status: orderWithUser.status,
+        createdAt: orderWithUser.createdAt,
+        shippingAddress: orderWithUser.shippingAddress
       }
     });
   } catch (error) {
@@ -74,22 +84,30 @@ router.get('/', auth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-    const orders = await Order.find({ userId: req.user._id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('userId', 'name email');
-
-    const total = await Order.countDocuments({ userId: req.user._id });
+    const { count, rows: orders } = await Order.findAndCountAll({
+      where: { userId: req.user.id },
+      include: [{
+        model: require('../models/User'),
+        as: 'user',
+        attributes: ['name', 'email']
+      }],
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
+    });
 
     // Transform orders to match frontend interface
     const transformedOrders = orders.map(order => ({
-      id: order._id,
-      userId: order.userId._id,
-      items: order.items,
-      total: order.total,
+      id: order.id,
+      userId: order.userId,
+      items: order.items.map(item => ({
+        ...item,
+        price: parseFloat(item.price),
+        quantity: parseInt(item.quantity)
+      })),
+      total: parseFloat(order.total),
       status: order.status,
       createdAt: order.createdAt,
       shippingAddress: order.shippingAddress
@@ -98,9 +116,9 @@ router.get('/', auth, async (req, res) => {
     res.json({
       success: true,
       count: transformedOrders.length,
-      total,
+      total: count,
       currentPage: page,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(count / limit),
       data: transformedOrders
     });
   } catch (error) {
@@ -117,9 +135,16 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const order = await Order.findOne({
-      _id: req.params.id,
-      userId: req.user._id
-    }).populate('userId', 'name email');
+      where: {
+        id: req.params.id,
+        userId: req.user.id
+      },
+      include: [{
+        model: require('../models/User'),
+        as: 'user',
+        attributes: ['name', 'email']
+      }]
+    });
 
     if (!order) {
       return res.status(404).json({
@@ -131,10 +156,14 @@ router.get('/:id', auth, async (req, res) => {
     res.json({
       success: true,
       data: {
-        id: order._id,
-        userId: order.userId._id,
-        items: order.items,
-        total: order.total,
+        id: order.id,
+        userId: order.userId,
+        items: order.items.map(item => ({
+          ...item,
+          price: parseFloat(item.price),
+          quantity: parseInt(item.quantity)
+        })),
+        total: parseFloat(order.total),
         status: order.status,
         createdAt: order.createdAt,
         shippingAddress: order.shippingAddress
@@ -163,26 +192,32 @@ router.put('/:id/status', auth, async (req, res) => {
       });
     }
 
-    const order = await Order.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user._id },
+    const [affectedRows] = await Order.update(
       { status },
-      { new: true, runValidators: true }
+      {
+        where: {
+          id: req.params.id,
+          userId: req.user.id
+        }
+      }
     );
 
-    if (!order) {
+    if (affectedRows === 0) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
       });
     }
 
+    const updatedOrder = await Order.findByPk(req.params.id);
+
     res.json({
       success: true,
       message: 'Order status updated successfully',
       data: {
-        id: order._id,
-        status: order.status,
-        updatedAt: order.updatedAt
+        id: updatedOrder.id,
+        status: updatedOrder.status,
+        updatedAt: updatedOrder.updatedAt
       }
     });
   } catch (error) {
