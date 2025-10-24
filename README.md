@@ -22,7 +22,7 @@ A modern full-stack ecommerce application built with React (frontend) and Node.j
 
 ### Backend
 - Node.js with Express.js
-- MongoDB with Mongoose
+- MySQL with Sequelize ORM
 - JWT for authentication
 - bcrypt for password hashing
 - CORS enabled for cross-origin requests
@@ -60,7 +60,11 @@ A modern full-stack ecommerce application built with React (frontend) and Node.j
    ```env
    NODE_ENV=development
    PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/ecommerce
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=ecommerce_db
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password
    JWT_SECRET=your-super-secret-jwt-key-here
    FAKE_STORE_API=https://fakestoreapi.com
    FRONTEND_URL=http://localhost:5173
