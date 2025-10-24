@@ -1,132 +1,157 @@
-# E-commerce Application - Monorepo Deployment Guide
+# Ecommerce Full-Stack Application
 
-This project contains both a React frontend and a Node.js/Express backend in a single repository, deployed separately on Vercel and Render.
+A modern full-stack ecommerce application built with React (frontend) and Node.js/Express (backend), featuring user authentication, product management, shopping cart, and order processing.
 
-## 🚀 Live Deployment
+## Features
 
-**Frontend (Vercel):** https://ecommerce-frontend-ps6h8rbd2-arun-saravanans-projects.vercel.app/
+- **User Authentication**: Secure login and registration with JWT tokens
+- **Product Management**: Browse and view detailed product information
+- **Shopping Cart**: Add, update, and remove items from cart
+- **Order Processing**: Complete checkout flow with order history
+- **Responsive Design**: Mobile-friendly UI built with Tailwind CSS
+- **RESTful API**: Well-structured backend API for all operations
 
-**Backend (Render):** https://ecommerce-backend-66nc.onrender.com/
+## Tech Stack
+
+### Frontend
+- React 18 with TypeScript
+- Vite for build tooling
+- Tailwind CSS for styling
+- React Router for navigation
+- Context API for state management
+
+### Backend
+- Node.js with Express.js
+- MongoDB with Mongoose
+- JWT for authentication
+- bcrypt for password hashing
+- CORS enabled for cross-origin requests
+
+## Installation
+
+### Prerequisites
+- Node.js (v16 or higher)
+- MongoDB (local or cloud instance)
+- npm or yarn
+
+### Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Arun-S-1505/FSD-Project.git
+   cd FSD-Project
+   ```
+
+2. **Install frontend dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Install backend dependencies:**
+   ```bash
+   cd backend
+   npm install
+   cd ..
+   ```
+
+4. **Environment Setup:**
+
+   **Backend (.env):**
+   ```env
+   NODE_ENV=development
+   PORT=5000
+   MONGODB_URI=mongodb://localhost:27017/ecommerce
+   JWT_SECRET=your-super-secret-jwt-key-here
+   FAKE_STORE_API=https://fakestoreapi.com
+   FRONTEND_URL=http://localhost:5173
+   ```
+
+   **Frontend (.env):**
+   ```env
+   VITE_API_BASE_URL=http://localhost:5000
+   ```
+
+## Usage
+
+### Running the Application
+
+1. **Start the backend server:**
+   ```bash
+   cd backend
+   npm run dev
+   ```
+   Server will run on http://localhost:5000
+
+2. **Start the frontend development server:**
+   ```bash
+   npm run dev
+   ```
+   Frontend will run on http://localhost:5173
+
+3. **Access the application:**
+   Open http://localhost:5173 in your browser
+
+### Building for Production
+
+**Frontend:**
+```bash
+npm run build
+```
+
+**Backend:**
+```bash
+cd backend
+npm run build  # if applicable
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/profile` - Get user profile (protected)
+
+### Products
+- `GET /api/products` - Get all products
+- `GET /api/products/:id` - Get product by ID
+
+### Orders
+- `POST /api/orders` - Create new order (protected)
+- `GET /api/orders` - Get user orders (protected)
 
 ## Project Structure
 
 ```
-├── src/                    # React frontend source code
-├── backend/               # Node.js backend source code
-├── package.json          # Frontend dependencies
-├── backend/package.json  # Backend dependencies
-├── vercel.json           # Frontend Vercel configuration
-└── backend/vercel.json   # Backend Vercel configuration
+├── src/                    # Frontend React application
+│   ├── components/         # Reusable UI components
+│   ├── pages/             # Page components
+│   ├── contexts/          # React contexts for state management
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Utility functions
+├── backend/               # Backend Node.js application
+│   ├── api/               # API route handlers
+│   ├── config/            # Database and configuration
+│   ├── middleware/        # Express middleware
+│   ├── models/            # MongoDB models
+│   ├── routes/            # API routes
+│   └── server.js          # Main server file
+├── public/                # Static assets
+└── package.json           # Frontend dependencies
 ```
 
-## Single Repository, Dual Deployment Strategy
+## Contributing
 
-### Step 1: Push to GitHub
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-1. **Create a single GitHub repository:**
-   ```bash
-   # If you haven't already, add your GitHub repository
-   git remote add origin https://github.com/YOUR_USERNAME/ecommerce-app.git
-   git branch -M main
-   git push -u origin main
-   ```
+## License
 
-### Step 2: Deploy Backend on Render
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-1. **Go to Render.com** → New Web Service
-2. **Import your repository**
-3. **Configure for Backend:**
+## Acknowledgments
 
-   - Project Name: `ecommerce-backend`
-   - Environment: Node
-   - **Root Directory: `backend`** ← This is key!
-   - Build Command: `npm install`
-   - Start Command: `npm start`
-
-4. **Add Environment Variables:**
-
-   ```
-   NODE_ENV=production
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ecommerce
-   JWT_SECRET=your-super-secret-jwt-key-here
-   FAKE_STORE_API=https://fakestoreapi.com
-   FRONTEND_URL=https://your-frontend-vercel-url.vercel.app
-   ```
-
-5. **Deploy** and note the URL (e.g., `https://ecommerce-backend-66nc.onrender.com`)
-
-### Step 3: Deploy Frontend on Vercel
-
-1. **Go to Vercel.com** → New Project
-2. **Import the SAME repository again**
-3. **Configure for Frontend:**
-
-   - Project Name: `ecommerce-frontend`
-   - Framework: Vite
-   - **Root Directory: `./` (leave empty)** ← This deploys from root
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-   - Install Command: `npm install`
-
-4. **Add Environment Variable:**
-
-   ```
-   VITE_API_BASE_URL=https://your-render-backend-url.onrender.com
-   ```
-
-   (Use the URL from Step 2)
-
-5. **Deploy**
-
-## Advantages of This Approach
-
-✅ **Single Repository**: Easier to manage code changes
-✅ **Separate Deployments**: Frontend and backend deploy independently  
-✅ **Independent Scaling**: Each service can scale separately
-✅ **Environment Isolation**: Different environment variables for each
-✅ **Easier Development**: All code in one place
-✅ **Backend on Render**: Better suited for Express.js applications
-✅ **Frontend on Vercel**: Optimized for React/Vite applications
-
-## Environment Variables
-
-### Frontend (.env)
-
-```
-VITE_API_BASE_URL=https://ecommerce-backend-66nc.onrender.com
-```
-
-### Backend (Set in Render Dashboard)
-
-```
-NODE_ENV=production
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ecommerce
-JWT_SECRET=your-super-secret-jwt-key
-FAKE_STORE_API=https://fakestoreapi.com
-FRONTEND_URL=https://ecommerce-frontend-ps6h8rbd2-arun-saravanans-projects.vercel.app
-```
-
-## Local Development
-
-**Frontend:**
-
-```bash
-npm install
-npm run dev
-```
-
-**Backend:**
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-## Testing the Deployment
-
-1. **Test backend:** Visit `https://ecommerce-backend-66nc.onrender.com/api/products`
-2. **Test frontend:** Visit `https://ecommerce-frontend-ps6h8rbd2-arun-saravanans-projects.vercel.app/`
-3. **Test integration:** Ensure frontend can communicate with backend
-
-Your monorepo is now ready for dual deployment on Vercel and Render! 🚀
+- Product data sourced from [Fake Store API](https://fakestoreapi.com/)
+- UI design inspired by modern ecommerce platforms
